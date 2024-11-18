@@ -10,11 +10,7 @@ app.use(bodyParser.json());
 const PORT = process.env.PORT || 3000;
 
 app.get("/", async (req: Request, res: Response) => {
-  // const state = await compiled.invoke(
-  //   { messages: [new HumanMessage("Hi, I'm Wei Su")] },
-  //   { configurable: { thread_id: "42" } },
-  // );
-  // console.log(state.messages[state.messages.length - 1].content);
+  res.send("Pano app server is running");
 });
 
 app.use("/thread", threadRouter);
