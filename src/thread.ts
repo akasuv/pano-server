@@ -34,6 +34,7 @@ async function callModel(
 
   const model = new ChatOpenAI({
     model: modelName,
+    streaming: true,
     configuration: {
       baseURL: process.env["OPENAI_BASE_URL"],
     },
@@ -59,18 +60,35 @@ const graph = workflow.compile({ checkpointer });
 router.post("/", async (req, res) => {
   const { message, model, threadId } = req.body;
 
-  console.log({
-    model,
-    threadId,
-  });
-  const finalState = await graph.invoke(
+  console.log(`Received message for model: ${model} and threadId: ${threadId}`);
+
+  const stream = graph.streamEvents(
     { messages: [new HumanMessage(message)] },
-    { configurable: { thread_id: threadId, model } },
+    {
+      configurable: { thread_id: threadId, model },
+      streamMode: "updates",
+      version: "v2",
+    },
   );
 
-  res.json({
-    message: finalState.messages[finalState.messages.length - 1].content,
-  });
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  for await (const event of stream) {
+    const eventKind = event.event;
+    const eventName = event.name;
+
+    if (eventKind === "on_chain_end" && eventName === "LangGraph") {
+      res.end();
+    }
+
+    if (event.data.chunk?.content === undefined) {
+      continue;
+    }
+
+    res.write(event.data.chunk?.content);
+  }
 });
 
 export default router;
