@@ -4,8 +4,12 @@ import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
 import { StateGraph } from "@langchain/langgraph";
 import { MemorySaver, Annotation } from "@langchain/langgraph";
 import { RunnableConfig } from "@langchain/core/runnables";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+import tools from "../tools";
 
 const router = express.Router();
+
+const toolNode = new ToolNode(tools);
 
 const StateAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
@@ -38,7 +42,7 @@ async function callModel(
     configuration: {
       baseURL: process.env["OPENAI_BASE_URL"],
     },
-  });
+  }).bindTools(tools);
 
   const messages = state.messages;
   const response = await model.invoke(messages);
@@ -50,8 +54,10 @@ async function callModel(
 // Define a new graph
 const workflow = new StateGraph(StateAnnotation)
   .addNode("agent", callModel)
+  .addNode("tools", toolNode)
   .addEdge("__start__", "agent")
-  .addConditionalEdges("agent", shouldContinue);
+  .addConditionalEdges("agent", shouldContinue)
+  .addEdge("tools", "agent");
 
 const checkpointer = new MemorySaver();
 
