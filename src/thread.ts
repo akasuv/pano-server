@@ -60,12 +60,10 @@ const graph = workflow.compile({ checkpointer });
 router.post("/", async (req, res) => {
   const { message, model, threadId } = req.body;
 
-  console.log(`Received message for model: ${model} and threadId: ${threadId}`);
-
   const stream = graph.streamEvents(
     { messages: [new HumanMessage(message)] },
     {
-      configurable: { thread_id: threadId, model },
+      configurable: { thread_id: threadId, model: "gpt-4o" },
       streamMode: "updates",
       version: "v2",
     },
@@ -86,7 +84,6 @@ router.post("/", async (req, res) => {
     if (event.data.chunk?.content === undefined) {
       continue;
     }
-
     res.write(event.data.chunk?.content);
   }
 });
