@@ -47,6 +47,9 @@ dependencies:
   pm2:
     specifier: ^5.4.3
     version: 5.4.3
+  typescript:
+    specifier: ^5.6.3
+    version: 5.6.3
   zod:
     specifier: ^3.23.8
     version: 3.23.8
@@ -61,9 +64,6 @@ devDependencies:
   ts-node:
     specifier: ^10.9.2
     version: 10.9.2(@types/node@22.9.0)(typescript@5.6.3)
-  typescript:
-    specifier: ^5.6.3
-    version: 5.6.3
 
 packages:
 
@@ -2213,7 +2213,6 @@ packages:
     resolution: {integrity: sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: true
 
   /uid-safe@2.1.5:
     resolution: {integrity: sha512-KPHm4VL5dDXKz01UuEd88Df+KzynaohSL9fBh096KWAxSKZQDI2uBrVqtvRM4rwrIrRRKsdLNML/lnaaVSRioA==}
