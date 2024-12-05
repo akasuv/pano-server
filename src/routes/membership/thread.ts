@@ -5,9 +5,12 @@ import { StateGraph } from "@langchain/langgraph";
 import { MemorySaver, Annotation } from "@langchain/langgraph";
 import { RunnableConfig } from "@langchain/core/runnables";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import tools from "../tools";
+import tools from "@/tools";
+import { claimIncludes } from "express-oauth2-jwt-bearer";
 
 const router = express.Router();
+
+const claimCheck = claimIncludes("membershipStatus", "active");
 
 const toolNode = new ToolNode(tools);
 
@@ -63,7 +66,7 @@ const checkpointer = new MemorySaver();
 
 const graph = workflow.compile({ checkpointer });
 
-router.post("/", async (req, res) => {
+router.post("/", claimCheck, async (req, res) => {
   const { message, model, threadId } = req.body;
 
   const stream = graph.streamEvents(

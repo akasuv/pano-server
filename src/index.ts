@@ -1,11 +1,12 @@
 import "dotenv/config";
-
 import express, { Request, Response } from "express";
-import { auth, claimIncludes, requiredScopes } from "express-oauth2-jwt-bearer";
+import { auth } from "express-oauth2-jwt-bearer";
 import bodyParser from "body-parser";
-import thread from "./routes/thread";
 import googleOauthCallback from "./routes/google-oauth-callback";
 import oauth from "./routes/oauth";
+import thread from "@/routes/membership/thread";
+
+const PORT = process.env.PORT || 3000;
 
 const jwtCheck = auth({
   audience: "https://api.panoapp.ai",
@@ -14,27 +15,12 @@ const jwtCheck = auth({
 });
 
 const app = express();
-app.use(bodyParser.json());
 
-// enforce on all endpoints
+app.use(bodyParser.json());
 app.use(jwtCheck);
 
-const PORT = process.env.PORT || 3000;
-
 app.get("/", async (req: Request, res: Response) => {
-  // res.send("Pano app server is running");
-  //
-  res.json({ name: "1" });
-});
-
-const claim = claimIncludes("membershipStatus", "active");
-
-app.get("/api/private-scoped", claim, (req, res) => {
-  console.log("membershipStatus", req.auth?.payload.membershipStatus);
-  res.json({
-    message:
-      "You need to be authenticated and have a scope of read:messages to see this.",
-  });
+  res.send("Pano app server is running");
 });
 
 app.use("/thread", thread);
