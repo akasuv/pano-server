@@ -35,6 +35,9 @@ dependencies:
   express:
     specifier: ^4.21.1
     version: 4.21.1
+  express-oauth2-jwt-bearer:
+    specifier: ^1.6.0
+    version: 1.6.0
   express-session:
     specifier: ^1.18.1
     version: 1.18.1
@@ -850,6 +853,13 @@ packages:
     resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
     dev: false
 
+  /express-oauth2-jwt-bearer@1.6.0:
+    resolution: {integrity: sha512-HXnez7vocYlOqlfF3ozPcf/WE3zxT7zfUNfeg5FHJnvNwhBYlNXiPOvuCtBalis8xcigvwtInzEKhBuH87+9ug==}
+    engines: {node: ^12.19.0 || ^14.15.0 || ^16.13.0 || ^18.12.0 || ^20.2.0}
+    dependencies:
+      jose: 4.15.9
+    dev: false
+
   /express-session@1.18.1:
     resolution: {integrity: sha512-a5mtTqEaZvBCL9A9aqkrtfz+3SMDhOVUnjafjo+s7A9Txkq+SVX2DLvSp1Zrv4uCXa3lMSK3viWnh9Gg07PBUA==}
     engines: {node: '>= 0.8.0'}
@@ -1270,6 +1280,10 @@ packages:
   /is-stream@2.0.1:
     resolution: {integrity: sha512-hFoiJiTl63nn+kstHGBtewWSKnQLpyb155KHheA1l39uvtO9nWIop1p3udqPcUd/xbF1VLMO4n7OI6p7RbngDg==}
     engines: {node: '>=8'}
+    dev: false
+
+  /jose@4.15.9:
+    resolution: {integrity: sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA==}
     dev: false
 
   /js-git@0.7.8:

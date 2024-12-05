@@ -4,8 +4,7 @@ import { z } from "zod";
 
 const getGoogleAuth = tool(
   () => {
-    const url = getAuthUrl();
-    console.log("URL", url);
+    const url = "http://localhost:8080/oauth";
     return url;
   },
   {
