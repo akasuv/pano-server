@@ -10,7 +10,7 @@ import { claimIncludes } from "express-oauth2-jwt-bearer";
 
 const router = express.Router();
 
-const claimCheck = claimIncludes("membershipStatus", "active");
+// const claimCheck = claimIncludes("membershipStatus", "active");
 
 const toolNode = new ToolNode(tools);
 
@@ -66,7 +66,7 @@ const checkpointer = new MemorySaver();
 
 const graph = workflow.compile({ checkpointer });
 
-router.post("/", claimCheck, async (req, res) => {
+router.post("/", async (req, res) => {
   const { message, model, threadId } = req.body;
 
   const stream = graph.streamEvents(
