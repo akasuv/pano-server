@@ -1,20 +1,36 @@
-import { getAuthUrl } from "../../integrations/google";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import context from "@/context";
 
 const getGoogleAuth = tool(
-  () => {
-    console.log("getting context", context.session?.id);
-    const url = "http://localhost:8080/oauth?sessionId=" + context.session?.id;
+  async (input) => {
+    const scopes = input.scopes;
+    const queryString = (await import("query-string")).default;
+    console.log("scopes", scopes);
+
+    const scopeString = queryString.stringify(
+      { scopes },
+      { arrayFormat: "comma" },
+    );
+
+    const url = queryString.stringifyUrl({
+      url: `http://localhost:8080/oauth?${scopeString}`,
+      query: {
+        sessionId: context.session?.id,
+        provider: "google",
+      },
+    });
+
     return url;
   },
   {
     name: "get_google_auth",
     description:
-      "Use this tool if the user is not authed. It will return a URL that the user can use to authenticate with Google.",
+      "Use this tool if the user is not authed. Pass scopes only related to the user requested functions, ask user for specific scopes if you cant decide. It returns a URL that the user can use to authenticate with Google.",
     schema: z.object({
-      noOp: z.string().optional().describe("No-op parameter."),
+      scopes: z
+        .array(z.string())
+        .describe("Scopes that relate to the user requested functions."),
     }),
   },
 );

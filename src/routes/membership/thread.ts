@@ -66,9 +66,9 @@ const checkpointer = new MemorySaver();
 const graph = workflow.compile({ checkpointer });
 
 router.post("/", async (req, res) => {
-  const { message, model, threadId } = req.body;
+  const { message, threadId } = req.body;
 
-  console.log("thread req:", req.auth?.token);
+  console.log("thread request:", req.body);
 
   const stream = graph.streamEvents(
     { messages: [new HumanMessage(message)] },

@@ -6,7 +6,6 @@ import { supabase } from "./middlewares";
 import thread from "@/routes/membership/thread";
 import oauth from "@/routes/oauth/oauth-server";
 import oauthCallback from "@/routes/oauth/oauth-callback";
-import addNewOauthService from "@/routes/oauth/add-new-service";
 import session from "express-session";
 import contEXt from "./context";
 import context from "./context";
@@ -23,9 +22,6 @@ const app = express();
 
 app.use(session({ secret: "keyboard cat" }));
 app.use(bodyParser.json());
-// app.use(jwtCheck);
-
-// app.use(supabase);
 
 const saveAccessTokenToSession = (
   req: Request,
@@ -34,7 +30,6 @@ const saveAccessTokenToSession = (
 ) => {
   req.session.accessToken = req.auth?.token;
   context.setSession(req.session);
-  console.log("saveAccessTokenToSession", req.session.accessToken);
 
   next();
 };
@@ -46,7 +41,6 @@ app.get("/", async (req: Request, res: Response) => {
 app.use("/thread", jwtCheck, saveAccessTokenToSession, thread);
 app.use("/oauth-callback", oauthCallback);
 app.use("/oauth", oauth);
-app.use("/add-oauth-service", addNewOauthService);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
