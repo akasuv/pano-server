@@ -1,7 +1,6 @@
 import { google, Auth } from "googleapis";
 import Supabase from "@/supabase";
 import { jwtDecode } from "jwt-decode";
-import { createRequire } from "module";
 
 interface OAuth {
   client: Auth.OAuth2Client;
@@ -25,9 +24,11 @@ class OAuthGoogle implements OAuth {
   supabase?: Supabase;
   requestAccessToken?: string;
   isAuthed?: boolean;
+  provider: "google";
 
   constructor() {
     console.log("OAuthGoogle: Initializing OAuthGoogle");
+    this.provider = "google";
 
     this.client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
@@ -49,6 +50,7 @@ class OAuthGoogle implements OAuth {
       scope: scope,
       include_granted_scopes: true,
       state: state,
+      access_type: "offline",
     });
     return url;
   }
@@ -61,24 +63,33 @@ class OAuthGoogle implements OAuth {
   }
 
   async saveTokensToDB(tokens: Auth.Credentials) {
-    console.log("OAuthGoogle: Saving Tokens to DB");
+    console.log("OAuthGoogle: Saving Tokens to DB", tokens);
     if (!this.supabase || !this.requestAccessToken) {
       throw new Error("supabase or requestAccessToken not initialized");
     }
 
     const accessToken = tokens.access_token;
+    const refreshToken = tokens.refresh_token;
     const scope = tokens.scope;
 
     const decoded = jwtDecode(this.requestAccessToken);
 
     const { data: dbData, error } = await this.supabase.client
       .from("oauth_tokens")
-      .insert({
-        user_id: decoded.sub,
-        scope: scope,
-        access_token: accessToken,
-        resource_server_name: "google" + Date.now(),
-      });
+      .upsert(
+        {
+          user_id: decoded.sub,
+          scope: scope,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          provider: this.provider,
+        },
+        {
+          onConflict: "user_id",
+        },
+      );
+
+    console.log("supabase", dbData, error);
 
     return tokens;
   }
@@ -101,12 +112,17 @@ class OAuthGoogle implements OAuth {
 
     const first = data?.[0];
     const accessToken = first?.access_token;
+    const refreshToken = first?.refresh_token;
     const scope = first?.scope;
 
     console.log("loading data from db - data:", data);
 
     if (accessToken && scope) {
-      const credentials = { access_token: accessToken, scope };
+      const credentials = {
+        access_token: accessToken,
+        scope,
+        refresh_token: refreshToken,
+      };
 
       this.credentials = credentials;
       return credentials;
@@ -118,6 +134,14 @@ class OAuthGoogle implements OAuth {
   async setCredentials(credentials: Auth.Credentials) {
     console.log("OAuthGoogle: Setting Credentials");
     this.client.setCredentials(credentials);
+
+    if (credentials.refresh_token) {
+      const newCredentials = (await this.client.refreshAccessToken())
+        .credentials;
+
+      console.log("new credentials", newCredentials);
+      await this.saveTokensToDB(newCredentials);
+    }
   }
 
   async listEvents() {
