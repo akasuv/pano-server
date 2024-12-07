@@ -1,10 +1,12 @@
 import { getAuthUrl } from "../../integrations/google";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import context from "@/context";
 
 const getGoogleAuth = tool(
   () => {
-    const url = "http://localhost:8080/oauth";
+    console.log("getting context", context.session?.id);
+    const url = "http://localhost:8080/oauth?sessionId=" + context.session?.id;
     return url;
   },
   {

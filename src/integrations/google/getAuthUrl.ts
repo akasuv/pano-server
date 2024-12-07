@@ -1,11 +1,13 @@
 import crypto from "crypto";
-import oauth2Client from "./oauth2Client";
+import createGoogleOauth2Client from "./oauth2Client";
 
 const scopes = ["https://www.googleapis.com/auth/calendar.readonly"];
 
-const getAuthUrl = () => {
+const getAuthUrl = (state: string) => {
   // Generate a secure random state value.
-  const state = crypto.randomBytes(32).toString("hex");
+  // const state = crypto.randomBytes(32).toString("hex");
+  //
+  const oauth2Client = createGoogleOauth2Client();
 
   const authorizationUrl = oauth2Client.generateAuthUrl({
     scope: scopes,

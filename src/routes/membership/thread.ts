@@ -6,7 +6,6 @@ import { MemorySaver, Annotation } from "@langchain/langgraph";
 import { RunnableConfig } from "@langchain/core/runnables";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import tools from "@/tools";
-import { claimIncludes } from "express-oauth2-jwt-bearer";
 
 const router = express.Router();
 
@@ -69,10 +68,16 @@ const graph = workflow.compile({ checkpointer });
 router.post("/", async (req, res) => {
   const { message, model, threadId } = req.body;
 
+  console.log("thread req:", req.auth?.token);
+
   const stream = graph.streamEvents(
     { messages: [new HumanMessage(message)] },
     {
-      configurable: { thread_id: threadId, model: "gpt-4o" },
+      configurable: {
+        thread_id: threadId,
+        model: "gpt-4o",
+        accessToken: req.auth?.token,
+      },
       streamMode: "updates",
       version: "v2",
     },

@@ -1,13 +1,17 @@
 import Express from "express";
 import { getAuthUrl } from "@/integrations/google";
+import url from "url";
 
 const router = Express.Router();
 
 router.get("/", (req, res) => {
-  const url = getAuthUrl();
+  const query = url.parse(req.url, true).query;
+  const sessionId = query.sessionId as string;
 
-  res.redirect(302, url);
-  res.json({ success: true });
+  const authServerUrl = getAuthUrl(sessionId);
+
+  res.redirect(302, authServerUrl);
+  // res.json({ success: true });
 });
 
 export default router;

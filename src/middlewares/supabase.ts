@@ -28,4 +28,4 @@ const supabase = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { supabase };
+export { supabase, initSupabaseClient };
