@@ -4,6 +4,7 @@ import { tool } from "@langchain/core/tools";
 const scopes = [
   "https://www.googleapis.com/auth/calendar",
   "https://www.googleapis.com/auth/documents",
+  "https://mail.google.com",
 ];
 
 const getAllScopes = tool(() => scopes, {

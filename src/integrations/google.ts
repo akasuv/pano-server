@@ -232,6 +232,47 @@ class OAuthGoogle implements OAuth {
 
     return createResponse.data.documentId;
   }
+
+  async sendEmail({
+    title,
+    body,
+    recipient,
+  }: {
+    title: string;
+    body: string;
+    recipient: string;
+  }) {
+    const gmail = google.gmail({ version: "v1", auth: this.client });
+
+    try {
+      const res = await gmail.users.messages.send({
+        userId: "me",
+
+        requestBody: {
+          raw: btoa(
+            [
+              `To: <${recipient}>`,
+              `Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(title)))}?=`,
+              `Content-Type: text/plain; charset="UTF-8"`,
+              `Content-Transfer-Encoding: base64`,
+              ``,
+              btoa(unescape(encodeURIComponent(body))),
+            ].join("\n"),
+          ),
+          // payload: {
+          //   body: {
+          //     data: btoa(body),
+          //   },
+          // },
+        },
+      });
+
+      return res.data.id;
+    } catch (error) {
+      console.error("Error sending email", error);
+      return "Error sending email";
+    }
+  }
 }
 
 export default OAuthGoogle;

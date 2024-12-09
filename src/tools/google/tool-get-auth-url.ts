@@ -14,7 +14,7 @@ const getGoogleAuth = tool(
     );
 
     const url = queryString.stringifyUrl({
-      url: `http://localhost:8080/oauth?${scopeString}`,
+      url: `https://api.panoapp.ai/oauth?${scopeString}`,
       query: {
         sessionId: context.session?.id,
         provider: "google",
