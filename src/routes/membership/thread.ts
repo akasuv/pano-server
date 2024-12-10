@@ -102,13 +102,13 @@ router.post("/", async (req, res) => {
       res.write(
         JSON.stringify({
           type: "indicator",
-          content: "Pano is using: " + event.metadata?.toolProvider?.name,
+          content: event.metadata?.toolProvider?.name,
           logo: event.metadata?.toolProvider?.logo,
         }),
       );
     }
 
-    if (event.data.chunk?.content === undefined) {
+    if (!event.data.chunk?.content) {
       continue;
     }
 

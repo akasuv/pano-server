@@ -7,7 +7,6 @@ import thread from "@/routes/membership/thread";
 import oauth from "@/routes/oauth/oauth-server";
 import oauthCallback from "@/routes/oauth/oauth-callback";
 import session from "express-session";
-import contEXt from "./context";
 import context from "./context";
 
 const PORT = process.env.PORT || 3000;
