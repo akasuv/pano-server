@@ -14,7 +14,7 @@ const getGoogleAuth = tool(
     );
 
     const url = queryString.stringifyUrl({
-      url: `https://api.panoapp.ai/oauth?${scopeString}`,
+      url: `${process.env.PANO_OAUTH_URL}?${scopeString}`,
       query: {
         sessionId: context.session?.id,
         provider: "google",
@@ -32,6 +32,12 @@ const getGoogleAuth = tool(
         .array(z.string())
         .describe("Scopes that relate to the user requested functions."),
     }),
+    metadata: {
+      toolProvider: {
+        name: "Google Auth",
+        logo: "https://lh3.googleusercontent.com/COxitqgJr1sJnIDe8-jiKhxDx1FrYbtRHKJ9z_hELisAlapwE9LUPh6fcXIfb5vwpbMl4xl9H9TRFPc5NOO8Sb3VSgIBrfRYvW6cUA",
+      },
+    },
   },
 );
 

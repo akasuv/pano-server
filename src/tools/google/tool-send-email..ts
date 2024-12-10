@@ -33,6 +33,12 @@ const sendGmail = tool(
       body: z.string().describe("Body of the document in plain text."),
       recipient: z.string().describe("Recipient of the email."),
     }),
+    metadata: {
+      toolProvider: {
+        name: "Gmail",
+        logo: "https://lh3.googleusercontent.com/0rpHlrX8IG77awQMuUZpQ0zGWT7HRYtpncsuRnFo6V3c8Lh2hPjXnEuhDDd-OsLz1vua4ld2rlUYFAaBYk-rZCODmi2eJlwUEVsZgg",
+      },
+    },
   },
 );
 

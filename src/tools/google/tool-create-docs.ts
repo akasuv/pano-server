@@ -30,6 +30,12 @@ const createGoogleDocs = tool(
       title: z.string().describe("Title of the document."),
       body: z.string().describe("Body of the document."),
     }),
+    metadata: {
+      toolProvider: {
+        name: "Google Docs",
+        logo: "https://lh3.googleusercontent.com/1DECuhPQ1y2ppuL6tdEqNSuObIm_PW64w0mNhm3KGafi40acOJkc4nvsZnThoDKTH8gWyxAnipJmvCiszX8R6UAUu1UyXPfF13d7",
+      },
+    },
   },
 );
 

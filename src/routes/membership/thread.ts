@@ -95,10 +95,26 @@ router.post("/", async (req, res) => {
       res.end();
     }
 
+    if (
+      event.metadata.langgraph_node === "tools" &&
+      event.event === "on_tool_start"
+    ) {
+      res.write(
+        JSON.stringify({
+          type: "indicator",
+          content: "Pano is using: " + event.metadata?.toolProvider?.name,
+          logo: event.metadata?.toolProvider?.logo,
+        }),
+      );
+    }
+
     if (event.data.chunk?.content === undefined) {
       continue;
     }
-    res.write(event.data.chunk?.content);
+
+    res.write(
+      JSON.stringify({ type: "message", content: event.data.chunk?.content }),
+    );
   }
 });
 

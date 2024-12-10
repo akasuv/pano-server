@@ -8,6 +8,11 @@ const getNumber = tool(() => 42, {
   schema: z.object({
     noOp: z.string().optional().describe("No-op parameter."),
   }),
+  metadata: {
+    toolProvider: {
+      name: "SIER",
+    },
+  },
 });
 
 export default getNumber;

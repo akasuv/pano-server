@@ -26,6 +26,12 @@ const listGoogleCalendarEvents = tool(
     schema: z.object({
       noOp: z.string().optional().describe("No-op parameter."),
     }),
+    metadata: {
+      toolProvider: {
+        name: "Google Calendar",
+        logo: "https://lh3.googleusercontent.com/MxyI2wjFGTDQ0Vs_ydI9x0je9SeKQqwiYgvXHS9z9Tf-w0FHvkTXTfJLtkL6vUc28IPTdDDKGnmL_gyvsHLo9i67vNTGF7FdzMUblcGeSv24_MtT3dA",
+      },
+    },
   },
 );
 
