@@ -30,6 +30,11 @@ const createTripItinerary = tool(
       endTime: z.string().describe("The end time of the trip"),
       endPlace: z.string().describe("The end place of the trip"),
     }),
+    metadata: {
+      toolProvider: {
+        name: "Trip Planner",
+      },
+    },
   },
 );
 

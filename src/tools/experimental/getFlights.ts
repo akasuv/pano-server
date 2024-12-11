@@ -46,6 +46,11 @@ const getFlights = tool(
           "The id of the arrival airport, format: uppercase 3-letter code",
         ),
     }),
+    metadata: {
+      toolProvider: {
+        name: "Google Flights",
+      },
+    },
   },
 );
 
