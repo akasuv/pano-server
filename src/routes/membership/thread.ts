@@ -5,11 +5,9 @@ import { StateGraph } from "@langchain/langgraph";
 import { MemorySaver, Annotation } from "@langchain/langgraph";
 import { RunnableConfig } from "@langchain/core/runnables";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import tools from "@/tools";
+import tools from "@/tool-registry";
 
 const router = express.Router();
-
-// const claimCheck = claimIncludes("membershipStatus", "active");
 
 const toolNode = new ToolNode(tools);
 
@@ -24,15 +22,12 @@ function shouldContinue(state: typeof StateAnnotation.State) {
   const messages = state.messages;
   const lastMessage = messages[messages.length - 1] as AIMessage;
 
-  // If the LLM makes a tool call, then we route to the "tools" node
   if (lastMessage.tool_calls?.length) {
     return "tools";
   }
-  // Otherwise, we stop (reply to the user)
   return "__end__";
 }
 
-// Define the function that calls the model
 async function callModel(
   state: typeof StateAnnotation.State,
   config?: RunnableConfig,
@@ -50,7 +45,6 @@ async function callModel(
   const messages = state.messages;
   const response = await model.invoke(messages);
 
-  // We return a list, because this will get added to the existing list
   return { messages: [response] };
 }
 
@@ -140,8 +134,6 @@ router.post("/", async (req, res) => {
     for await (const event of stream) {
       const eventKind = event.event;
       const eventName = event.name;
-
-      console.dir(event, { depth: null });
 
       if (eventKind === "on_chain_end" && eventName === "LangGraph") {
         res.end();

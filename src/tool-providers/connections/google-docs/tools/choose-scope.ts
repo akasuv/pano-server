@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { tool } from "@langchain/core/tools";
+import PanoTool from "@/tool-maker/PanoTool";
 
 const scopes = [
   "https://www.googleapis.com/auth/calendar",
@@ -7,19 +7,14 @@ const scopes = [
   "https://mail.google.com",
 ];
 
-const getAllScopes = tool(() => scopes, {
+const chooseScope = new PanoTool({
   name: "choose_scope",
   description:
     "This tool will return the scopes that can be used to authenticate with Google.",
   schema: z.object({
     noOp: z.string().optional().describe("No-op parameter."),
   }),
-  metadata: {
-    toolProvider: {
-      name: "Google Auth",
-      logo: "https://lh3.googleusercontent.com/COxitqgJr1sJnIDe8-jiKhxDx1FrYbtRHKJ9z_hELisAlapwE9LUPh6fcXIfb5vwpbMl4xl9H9TRFPc5NOO8Sb3VSgIBrfRYvW6cUA",
-    },
-  },
+  runner: () => scopes,
 });
 
-export default getAllScopes;
+export default chooseScope;
