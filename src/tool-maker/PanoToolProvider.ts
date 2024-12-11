@@ -5,13 +5,15 @@ import {
   tool as LangChainTool,
 } from "@langchain/core/tools";
 
+export type InstalledTool = DynamicStructuredTool<Schema>;
+
 export class PanoToolProvider<T extends PanoTool<z.infer<Schema>>> {
   type: PanoToolProvider.Type;
   name: string;
   description: string;
   logoUrl?: string;
   tools: T[] = [];
-  installedTools: DynamicStructuredTool<Schema>[] = [];
+  installedTools: InstalledTool[] = [];
 
   constructor(config: {
     type: PanoToolProvider.Type;

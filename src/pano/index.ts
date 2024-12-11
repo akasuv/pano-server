@@ -1,61 +1,87 @@
-// import { ChatOpenAI } from "@langchain/openai";
-// import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
-// import { LastValue, StateGraph } from "@langchain/langgraph";
-// import { MemorySaver, Annotation } from "@langchain/langgraph";
-// import { RunnableConfig } from "@langchain/core/runnables";
-// import { ToolNode } from "@langchain/langgraph/prebuilt";
-// import tools from "@/tool-registry";
+import { ChatOpenAI } from "@langchain/openai";
+import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
+import {
+  MemorySaver,
+  Annotation,
+  StateGraph,
+  StateType,
+  UpdateType,
+  START,
+  END,
+  BinaryOperatorAggregate,
+  CompiledStateGraph,
+} from "@langchain/langgraph";
+import { RunnableConfig } from "@langchain/core/runnables";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+import tools from "@/tool-registry";
+import logger from "@/config/logger";
 
-// type StateDefinition = {
-//   messages: ReturnType<typeof Annotation<BaseMessage[]>>;
-//   approved: LastValue<boolean>;
-// };
+export enum PanoGraphNode {
+  MindEngine = "MindEngine",
+  Toolbox = "Toolbox",
+}
 
-// class Pano {
-//   stateAnnotation: ReturnType<typeof Annotation.Root<StateDefinition>>;
-//   graph: StateGraph<
-//     typeof this.stateAnnotation,
-//     StateDefinition,
-//     StateDefinition,
-//     "__start__" | "agent"
-//   >;
+type SD = {
+  messages: BinaryOperatorAggregate<BaseMessage[], BaseMessage[]>;
+};
 
-//   constructor() {
-//     this.stateAnnotation = Annotation.Root({
-//       messages: Annotation<BaseMessage[]>({
-//         reducer: (x, y) => x.concat(y),
-//       }),
-//       approved: Annotation<boolean>(),
-//     });
+class Pano {
+  stateAnnotation: ReturnType<typeof Annotation.Root<SD>>;
+  graph: InstanceType<
+    typeof CompiledStateGraph<StateType<SD>, UpdateType<SD>, string, SD, SD>
+  >;
 
-//     // Define a new graph
-//     this.graph = new StateGraph(this.stateAnnotation).addNode(
-//       "agent",
-//       this.callModel,
-//     );
-//     // .addNode("tools", toolNode)
-//     // .addEdge("__start__", "agent")
-//     // .addConditionalEdges("agent", shouldContinue)
-//     // .addEdge("tools", "agent");
-//   }
+  constructor() {
+    logger.info("Pano initialized");
+    const stateDefinition: SD = {
+      messages: Annotation<BaseMessage[]>({
+        reducer: (x, y) => x.concat(y),
+      }),
+    };
 
-//   async callModel(
-//     state: typeof this.stateAnnotation.State,
-//     config?: RunnableConfig,
-//   ) {
-//     const modelName = config?.configurable?.model;
+    const checkpointer = new MemorySaver();
+    const toolsNode = new ToolNode(tools);
 
-//     const model = new ChatOpenAI({
-//       model: modelName,
-//       streaming: true,
-//       configuration: {
-//         baseURL: process.env["OPENAI_BASE_URL"],
-//       },
-//     }).bindTools(tools);
+    this.stateAnnotation = Annotation.Root(stateDefinition);
 
-//     const messages = state.messages;
-//     const response = await model.invoke(messages);
+    this.graph = new StateGraph(this.stateAnnotation)
+      .addNode(PanoGraphNode.MindEngine, this.mindEngineNode)
+      .addNode(PanoGraphNode.Toolbox, toolsNode)
+      .addEdge(START, PanoGraphNode.MindEngine)
+      .addEdge(PanoGraphNode.Toolbox, PanoGraphNode.MindEngine)
+      .addConditionalEdges(PanoGraphNode.MindEngine, this.shouldContinue)
+      .compile({ checkpointer });
+  }
 
-//     return { messages: [response] };
-//   }
-// }
+  shouldContinue(state: typeof this.stateAnnotation.State) {
+    const messages = state.messages;
+    const lastMessage = messages[messages.length - 1] as AIMessage;
+
+    if (lastMessage.tool_calls?.length) {
+      return "Toolbox";
+    }
+    return END;
+  }
+
+  async mindEngineNode(
+    state: typeof this.stateAnnotation.State,
+    config?: RunnableConfig,
+  ) {
+    const modelName = config?.configurable?.model;
+
+    const model = new ChatOpenAI({
+      model: modelName,
+      streaming: true,
+      configuration: {
+        baseURL: process.env["OPENAI_BASE_URL"],
+      },
+    }).bindTools(tools);
+
+    const messages = state.messages;
+    const response = await model.invoke(messages);
+
+    return { messages: [response] };
+  }
+}
+
+export default Pano;

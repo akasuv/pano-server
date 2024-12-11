@@ -2,12 +2,13 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import { auth } from "express-oauth2-jwt-bearer";
 import bodyParser from "body-parser";
-import { supabase } from "./middlewares";
+import { supabase, pano } from "./middlewares";
 import thread from "@/routes/membership/thread";
 import oauth from "@/routes/oauth/oauth-server";
 import oauthCallback from "@/routes/oauth/oauth-callback";
 import session from "express-session";
 import context from "./context";
+import { logMiddleware, default as logger } from "@/config/logger";
 
 const PORT = process.env.PORT || 3000;
 
@@ -19,8 +20,10 @@ const jwtCheck = auth({
 
 const app = express();
 
+app.use(logMiddleware);
 app.use(session({ secret: "keyboard cat" }));
 app.use(bodyParser.json());
+app.use(pano);
 
 const saveAccessTokenToSession = (
   req: Request,
@@ -42,5 +45,5 @@ app.use("/oauth-callback", oauthCallback);
 app.use("/oauth", oauth);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  logger.info(`Pano Server is running on http://localhost:${PORT}`);
 });
