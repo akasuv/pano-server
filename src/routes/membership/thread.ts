@@ -17,6 +17,7 @@ const StateAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
   }),
+  approved: Annotation<boolean>(),
 });
 
 function shouldContinue(state: typeof StateAnnotation.State) {
@@ -66,55 +67,119 @@ const checkpointer = new MemorySaver();
 const graph = workflow.compile({ checkpointer });
 
 router.post("/", async (req, res) => {
-  const { message, threadId } = req.body;
+  const { message, threadId, approved } = req.body;
 
   console.log("thread request:", req.body);
-
-  const stream = graph.streamEvents(
-    { messages: [new HumanMessage(message)] },
-    {
-      configurable: {
-        thread_id: threadId,
-        model: "gpt-4o",
-        accessToken: req.auth?.token,
-      },
-      streamMode: "updates",
-      version: "v2",
+  const config = {
+    configurable: {
+      thread_id: threadId,
+      model: "gpt-4o",
+      accessToken: req.auth?.token,
     },
-  );
+    streamMode: "updates",
+    version: "v2",
+  } as const;
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
-  for await (const event of stream) {
-    const eventKind = event.event;
-    const eventName = event.name;
+  if (approved) {
+    await graph.updateState(config, { approved: true });
 
-    if (eventKind === "on_chain_end" && eventName === "LangGraph") {
-      res.end();
-    }
+    const streamX = graph.streamEvents(null, config);
+    for await (const event of streamX) {
+      const eventKind = event.event;
+      const eventName = event.name;
+      await graph.updateState(config, { approved: true });
 
-    if (
-      event.metadata.langgraph_node === "tools" &&
-      event.event === "on_tool_start"
-    ) {
+      console.log(
+        "--------------------------------- APPROVED START -------------------------------",
+      );
+      console.dir(event, { depth: null });
+      console.log(
+        "--------------------------------- APPROVED END -------------------------------",
+      );
+
+      if (eventKind === "on_chain_end" && eventName === "LangGraph") {
+        res.end();
+      }
+
+      if (
+        event.metadata.langgraph_node === "tools" &&
+        event.event === "on_tool_start"
+      ) {
+        res.write(
+          JSON.stringify({
+            type: "tool-calling",
+            content: event.metadata?.toolProvider?.name,
+            logo: event.metadata?.toolProvider?.logo,
+          }),
+        );
+      }
+
+      if (!event.data.chunk?.content) {
+        continue;
+      }
+
       res.write(
         JSON.stringify({
-          type: "indicator",
-          content: event.metadata?.toolProvider?.name,
-          logo: event.metadata?.toolProvider?.logo,
+          type: "message",
+          content: event.data.chunk?.content,
         }),
       );
     }
+    await graph.updateState(config, { approved: false });
+  } else {
+    console.log("Not Approved!!!!!!!!!!!!!!!!!!!!!!!");
+    const stream = graph.streamEvents(
+      { messages: [new HumanMessage(message)] },
+      config,
+    );
 
-    if (!event.data.chunk?.content) {
-      continue;
+    for await (const event of stream) {
+      const eventKind = event.event;
+      const eventName = event.name;
+
+      console.dir(event, { depth: null });
+
+      if (eventKind === "on_chain_end" && eventName === "LangGraph") {
+        res.end();
+      }
+
+      if (
+        event.metadata.langgraph_node === "tools" &&
+        event.event === "on_tool_start"
+      ) {
+        res.write(
+          JSON.stringify({
+            type: "tool-calling",
+            content: event.metadata?.toolProvider?.name,
+            logo: event.metadata?.toolProvider?.logo,
+          }),
+        );
+      }
+
+      if (!event.data.chunk?.content) {
+        continue;
+      }
+
+      res.write(
+        JSON.stringify({ type: "message", content: event.data.chunk?.content }),
+      );
     }
 
-    res.write(
-      JSON.stringify({ type: "message", content: event.data.chunk?.content }),
-    );
+    // const isHumanApproved = (await graph.getState(config)).values.approved;
+
+    // console.log("is human approved: ", isHumanApproved);
+
+    // if (!isHumanApproved) {
+    //   res.write(
+    //     JSON.stringify({
+    //       type: "human-in-the-loop",
+    //     }),
+    //   );
+    // }
   }
 });
 
