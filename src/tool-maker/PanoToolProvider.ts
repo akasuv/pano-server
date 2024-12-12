@@ -4,6 +4,7 @@ import {
   DynamicStructuredTool,
   tool as LangChainTool,
 } from "@langchain/core/tools";
+import logger from "@/config/logger";
 
 export type InstalledTool = DynamicStructuredTool<Schema>;
 
@@ -44,13 +45,14 @@ export class PanoToolProvider<T extends PanoTool<z.infer<Schema>>> {
         toolProvider: {
           name: this.name,
           logo: this.logoUrl,
+          type: this.type,
         },
       },
     });
   }
 
   install() {
-    console.log("Installing tools for", this.name);
+    logger.info(`Installing ToolProvider: ${this.name}`);
     let installedTools = this.tools.map((tool) =>
       this.transformToLangChainTool(tool),
     );

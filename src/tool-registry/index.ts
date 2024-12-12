@@ -1,4 +1,4 @@
-import { extensions, connections } from "@/tool-providers";
+import { extensions, connections, system } from "@/tool-providers";
 
 const installedExtensions = extensions
   .map((extension) => extension.install())
@@ -8,6 +8,12 @@ const installedConnections = connections
   .map((connection) => connection.install())
   .flat();
 
-const tools = [...installedExtensions, ...installedConnections];
+const installedSystem = system.install();
+
+const tools = [
+  ...installedExtensions,
+  ...installedConnections,
+  ...installedSystem,
+];
 
 export default tools;
