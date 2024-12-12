@@ -33,7 +33,7 @@ export class PanoToolProvider<T extends PanoTool<z.infer<Schema>>> {
   }
 
   addTools(tools: T[]) {
-    this.tools.concat(tools);
+    this.tools = tools;
   }
 
   transformToLangChainTool(tool: PanoTool) {
