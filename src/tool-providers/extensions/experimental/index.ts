@@ -4,6 +4,7 @@ import createTripItinerary from "./tools/createTripItinerary";
 import browseWebsite from "./tools/browseWebsite";
 import getGoogleNews from "./tools/getGoogleNews";
 import searchGoogle from "./tools/searchGoogle";
+import getCurrentTime from "./tools/getCurrentTime";
 
 const experimental = new PanoToolProvider({
   name: "Experimental",
@@ -17,6 +18,7 @@ experimental.addTools([
   browseWebsite,
   getGoogleNews,
   searchGoogle,
+  getCurrentTime,
 ]);
 
 export default experimental;

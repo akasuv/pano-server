@@ -7,9 +7,13 @@ import { PanoToolProvider } from "@/tool-maker/PanoToolProvider";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-  req.log.info(req.body);
+  const { message, threadId, installedApps, timezone } = req.body;
 
-  const { message, threadId, installedApps } = req.body;
+  logger.info({
+    message,
+    threadId,
+    timezone,
+  });
 
   const config = {
     configurable: {
@@ -17,6 +21,7 @@ router.post("/", async (req, res) => {
       model: "gpt-4o",
       accessToken: req.auth?.token,
       installedApps,
+      timezone: timezone,
     },
     streamMode: "updates",
     version: "v2",
