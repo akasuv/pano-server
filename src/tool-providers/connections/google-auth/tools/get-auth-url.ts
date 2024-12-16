@@ -1,6 +1,6 @@
 import { z } from "zod";
-import context from "@/context";
 import PanoTool from "@/tool-maker/PanoTool";
+import logger from "@/config/logger";
 
 const getAuthUrl = new PanoTool({
   name: "get_google_auth",
@@ -11,10 +11,10 @@ const getAuthUrl = new PanoTool({
       .array(z.string())
       .describe("Scopes that relate to the user requested functions."),
   }),
-  runner: async (input) => {
+  runner: async (input, config) => {
+    logger.debug({ sessionId: config.configurable?.sessionId });
     const scopes = input.scopes;
     const queryString = (await import("query-string")).default;
-    console.log("scopes", scopes);
 
     const scopeString = queryString.stringify(
       { scopes },
@@ -22,10 +22,10 @@ const getAuthUrl = new PanoTool({
     );
 
     const url = queryString.stringifyUrl({
-      url: `${process.env.PANO_OAUTH_URL}?${scopeString}`,
+      url: `${process.env.PANO_ENDPOINT}/oauth?${scopeString}`,
       query: {
-        sessionId: context.session?.id,
-        provider: "google",
+        sessionId: config.configurable?.sessionId,
+        providerId: "95b82967-65bb-4e71-9129-20114a23150d",
       },
     });
 

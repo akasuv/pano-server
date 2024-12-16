@@ -17,6 +17,7 @@
     "@langchain/langgraph-checkpoint-postgres": "^0.0.2",
     "@langchain/openai": "^0.3.13",
     "@slack/oauth": "^3.0.1",
+    "@slack/web-api": "^7.8.0",
     "@supabase/supabase-js": "^2.47.1",
     "@types/body-parser": "^1.19.5",
     "@types/express-session": "^1.18.1",

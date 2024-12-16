@@ -9,11 +9,7 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   const { message, threadId, installedApps, timezone } = req.body;
 
-  logger.info({
-    message,
-    threadId,
-    timezone,
-  });
+  logger.info({ sessionId: req.session.id, message: "Thread session" });
 
   const config = {
     configurable: {
@@ -22,6 +18,7 @@ router.post("/", async (req, res) => {
       accessToken: req.auth?.token,
       installedApps,
       timezone: timezone,
+      sessionId: req.session.id,
     },
     streamMode: "updates",
     version: "v2",

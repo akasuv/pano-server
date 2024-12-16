@@ -1,25 +1,40 @@
 import url from "url";
 import OAuthGoogle from "@/integrations/google";
 import Express, { Request, Response } from "express";
+import logger from "@/config/logger";
+import getOAuthProvider from "@/integrations/getOAuthProvider";
 
 const router = Express.Router();
 
 router.get("/", async (req: Request, res: Response) => {
   const query = url.parse(req.url, true).query;
+
+  logger.info({ query });
+
   if (!query.state) {
     res.status(400).send("Error: state is not defined");
     return;
   }
 
   req.sessionStore.get(query.state as string, async (err, session) => {
+    logger.info({
+      message: "oauth redirect session by sessionId:" + query.state,
+      session: session,
+    });
     const accessToken = session?.accessToken;
+    const providerId = session?.providerId;
     const code = query.code as string;
-    const oauthGoogle = new OAuthGoogle();
+    const oauthProvider = getOAuthProvider(providerId);
+
+    logger.info({
+      message: "oauth redirect",
+      provider: providerId,
+    });
 
     if (!accessToken) {
       res.status(400).send("Authorization failed");
     } else {
-      await oauthGoogle.auth(accessToken, code);
+      await oauthProvider?.auth(accessToken, code);
       res.send(`
         <!DOCTYPE html>
         <html lang="en">

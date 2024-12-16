@@ -20,6 +20,9 @@ dependencies:
   '@slack/oauth':
     specifier: ^3.0.1
     version: 3.0.1
+  '@slack/web-api':
+    specifier: ^7.8.0
+    version: 7.8.0
   '@supabase/supabase-js':
     specifier: ^2.47.1
     version: 2.47.1

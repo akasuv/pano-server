@@ -1,6 +1,7 @@
 import { google, Auth } from "googleapis";
 import Supabase from "@/supabase";
 import { jwtDecode } from "jwt-decode";
+import logger from "@/config/logger";
 
 interface OAuth {
   client: Auth.OAuth2Client;
@@ -24,16 +25,16 @@ class OAuthGoogle implements OAuth {
   supabase?: Supabase;
   requestAccessToken?: string;
   isAuthed?: boolean;
-  provider: "google";
+  providerId: string;
 
   constructor() {
     console.log("OAuthGoogle: Initializing OAuthGoogle");
-    this.provider = "google";
 
+    this.providerId = "95b82967-65bb-4e71-9129-20114a23150d";
     this.client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URL,
+      process.env.PANO_OAUTH_REDIRECT,
     );
     this.isAuthed = false;
   }
@@ -63,7 +64,7 @@ class OAuthGoogle implements OAuth {
   }
 
   async saveTokensToDB(tokens: Auth.Credentials) {
-    console.log("OAuthGoogle: Saving Tokens to DB", tokens);
+    logger.info("OAuthGoogle: Saving Tokens to DB");
     if (!this.supabase || !this.requestAccessToken) {
       throw new Error("supabase or requestAccessToken not initialized");
     }
@@ -79,17 +80,17 @@ class OAuthGoogle implements OAuth {
       .upsert(
         {
           user_id: decoded.sub,
-          scope: scope,
+          scopes: scope?.split(","),
           access_token: accessToken,
           refresh_token: refreshToken,
-          provider: this.provider,
+          provider_id: this.providerId,
         },
         {
-          onConflict: "user_id",
+          onConflict: "user_id, provider_id",
         },
       );
 
-    console.log("supabase", dbData, error);
+    logger.info({ message: "supabase", dbData, error });
 
     return tokens;
   }

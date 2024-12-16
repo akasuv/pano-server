@@ -7,6 +7,6 @@ const sier = new PanoToolProvider({
   description: "This tool provider is from SIER",
 });
 
-sier.addTool(getTheNumber);
+// sier.addTool(getTheNumber);
 
 export default sier;

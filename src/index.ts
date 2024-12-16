@@ -4,8 +4,8 @@ import { auth } from "express-oauth2-jwt-bearer";
 import bodyParser from "body-parser";
 import { supabase, pano } from "./middlewares";
 import thread from "@/routes/membership/thread";
-import oauth from "@/routes/oauth/oauth-server";
-import oauthCallback from "@/routes/oauth/oauth-callback";
+import oauth from "@/routes/oauth";
+import oauthRedirect from "@/routes/oauth/redirect";
 import session from "express-session";
 import context from "./context";
 import { logMiddleware, default as logger } from "@/config/logger";
@@ -41,7 +41,7 @@ app.get("/", async (req: Request, res: Response) => {
 });
 
 app.use("/thread", jwtCheck, saveAccessTokenToSession, thread);
-app.use("/oauth-callback", oauthCallback);
+app.use("/oauth/redirect", oauthRedirect);
 app.use("/oauth", oauth);
 
 app.listen(PORT, () => {
