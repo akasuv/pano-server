@@ -8,6 +8,7 @@ abstract class OAuth implements PanoOAuth {
   supabase?: Supabase;
   requestAccessToken?: string;
   isAuthed?: boolean;
+
   abstract providerId: string;
   abstract getTokens: (code: string) => Promise<Credentials>;
   abstract setCredentials: (credentials: Credentials) => Promise<void>;
@@ -20,13 +21,13 @@ abstract class OAuth implements PanoOAuth {
   }) => Promise<string>;
 
   connectToSupabase({ requestAccessToken }: { requestAccessToken: string }) {
-    console.log("OAuthGoogle: Connecting to Supabase");
+    logger.info("Pano Connection OAuth: Connecting to Supabase");
     this.requestAccessToken = requestAccessToken;
     this.supabase = new Supabase({ accessToken: requestAccessToken });
   }
 
   async saveTokensToDB(tokens: Credentials) {
-    logger.info("OAuthGoogle: Saving Tokens to DB");
+    logger.info("Pano Connection OAuth: Saving Tokens to Supabase");
     if (!this.supabase || !this.requestAccessToken) {
       throw new Error("supabase or requestAccessToken not initialized");
     }
@@ -52,7 +53,14 @@ abstract class OAuth implements PanoOAuth {
         },
       );
 
-    logger.info({ message: "supabase", dbData, error });
+    if (error) {
+      logger.error({
+        message: "Pano Connection OAuth: Error saving tokens to supabase",
+        error,
+      });
+    } else {
+      logger.info("Pano Connection OAuth: Saved tokens to supabase");
+    }
 
     return tokens;
   }
@@ -65,8 +73,6 @@ abstract class OAuth implements PanoOAuth {
     const decoded = jwtDecode(this.requestAccessToken);
     const userId = decoded.sub;
 
-    console.log("loading tokens from db - user id: ", userId);
-
     const { data, error } = await this.supabase.client
       .from("oauth_tokens")
       .select()
@@ -76,8 +82,6 @@ abstract class OAuth implements PanoOAuth {
     const accessToken = first?.access_token;
     const refreshToken = first?.refresh_token;
     const scope = first?.scope;
-
-    console.log("loading data from db - data:", data);
 
     if (accessToken && scope) {
       const credentials = {
@@ -94,7 +98,6 @@ abstract class OAuth implements PanoOAuth {
   }
 
   async loadAuth(requestAccessToken: string) {
-    console.log("loading auth");
     this.connectToSupabase({
       requestAccessToken,
     });
@@ -106,12 +109,11 @@ abstract class OAuth implements PanoOAuth {
       this.isAuthed = true;
     }
 
-    console.log("isAuthed", this.isAuthed);
-
     return this;
   }
 
   async auth(requestAccessToken: string, code: string) {
+    logger.info("Pano Connection OAuth: Auth started");
     this.connectToSupabase({
       requestAccessToken,
     });

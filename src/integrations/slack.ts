@@ -4,7 +4,7 @@ import logger from "@/config/logger";
 import { WebClient } from "@slack/web-api";
 import OAuth from "./oauth";
 
-class OAuthSlack extends OAuth {
+class Slack extends OAuth {
   providerId = "31eefcd7-278c-47ab-ab7b-fdc6603c3d76";
 
   getAuthServerUrl = async ({
@@ -50,7 +50,7 @@ class OAuthSlack extends OAuth {
     );
 
     logger.info({
-      message: "OAuthSlack: Getting Tokens response",
+      message: "Slack: Getting Tokens response",
       data: res.data,
     });
 
@@ -136,4 +136,4 @@ class OAuthSlack extends OAuth {
   }
 }
 
-export default OAuthSlack;
+export default Slack;
