@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { LangGraphRunnableConfig } from "@langchain/langgraph";
 import PanoTool from "@/tool-maker/PanoTool";
-import OAuthGoogle from "@/integrations/google";
+import Google from "@/oauth/providers/google";
 
 const createGoogleDocs = new PanoTool({
   name: "create_google_docs",
@@ -11,18 +11,16 @@ const createGoogleDocs = new PanoTool({
     title: z.string().describe("Title of the document."),
     body: z.string().describe("Body of the document."),
   }),
-  runner: async (input, config: LangGraphRunnableConfig) => {
+  runner: async (
+    input,
+    config: LangGraphRunnableConfig,
+    oauthProvider: InstanceType<typeof Google>,
+  ) => {
     try {
-      const oauth = await new OAuthGoogle().loadAuth(
-        config.configurable!.accessToken,
-      );
-
-      if (oauth.isAuthed) {
-        return await oauth.createNewDocument({
-          title: input.title,
-          body: input.body,
-        });
-      }
+      return await oauthProvider.createNewDocument({
+        title: input.title,
+        body: input.body,
+      });
 
       return "Not authenticated.";
     } catch (err) {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import OAuthGoogle from "@/integrations/google";
+import Google from "@/oauth/providers/google";
 import PanoTool from "@/tool-maker/PanoTool";
 
 const sendGmail = new PanoTool({
@@ -11,20 +11,13 @@ const sendGmail = new PanoTool({
     body: z.string().describe("Body of the document in plain text."),
     recipient: z.string().describe("Recipient of the email."),
   }),
-  runner: async (input, config) => {
-    console.log("Pano is sending email: ", input);
+  runner: async (input, config, oauthProvider: InstanceType<typeof Google>) => {
     try {
-      const oauth = await new OAuthGoogle().loadAuth(
-        config.configurable!.accessToken,
-      );
-
-      if (oauth.isAuthed) {
-        return await oauth.sendEmail({
-          title: input.title,
-          body: input.body,
-          recipient: input.recipient,
-        });
-      }
+      return await oauthProvider.sendEmail({
+        title: input.title,
+        body: input.body,
+        recipient: input.recipient,
+      });
 
       return "Not authenticated.";
     } catch (err) {

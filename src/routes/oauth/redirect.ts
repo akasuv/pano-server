@@ -1,8 +1,7 @@
 import url from "url";
-import OAuthGoogle from "@/integrations/google";
 import Express, { Request, Response } from "express";
 import logger from "@/config/logger";
-import getOAuthProvider from "@/integrations/getOAuthProvider";
+import getOAuthProvider from "@/oauth/getOAuthProvider";
 
 const router = Express.Router();
 
@@ -24,6 +23,16 @@ router.get("/", async (req: Request, res: Response) => {
     const accessToken = session?.accessToken;
     const providerId = session?.providerId;
     const code = query.code as string;
+
+    if (!providerId) {
+      res.status(400).send("Error: Provider not found");
+      return;
+    }
+    if (!accessToken) {
+      res.status(400).send("Authorization failed");
+      return;
+    }
+
     const oauthProvider = getOAuthProvider(providerId);
 
     logger.info({
@@ -31,11 +40,8 @@ router.get("/", async (req: Request, res: Response) => {
       provider: providerId,
     });
 
-    if (!accessToken) {
-      res.status(400).send("Authorization failed");
-    } else {
-      await oauthProvider?.auth(accessToken, code);
-      res.send(`
+    await oauthProvider?.auth(accessToken, code);
+    res.send(`
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -49,7 +55,6 @@ router.get("/", async (req: Request, res: Response) => {
         </body>
         </html>
     `);
-    }
   });
 });
 

@@ -3,7 +3,7 @@ import getOAuthProviders from "./tools/get-oauth-provider";
 import getOAuthServerUrl from "./tools/get-oauth-server-url";
 
 const oAuth = new PanoToolProvider({
-  type: PanoToolProvider.Type.Connection,
+  type: PanoToolProvider.Type.Extension,
   name: "Pano Connections OAuth",
   description:
     "This tool provider will allow you to connect to many services using OAuth",

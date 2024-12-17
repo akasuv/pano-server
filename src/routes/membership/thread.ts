@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
   const config = {
     configurable: {
       thread_id: threadId,
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       accessToken: req.auth?.token,
       installedApps,
       timezone: timezone,

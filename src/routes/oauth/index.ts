@@ -1,5 +1,5 @@
 import Express from "express";
-import getOAuthProvider from "@/integrations/getOAuthProvider";
+import getOAuthProvider from "@/oauth/getOAuthProvider";
 import logger from "@/config/logger";
 
 const router = Express.Router();
@@ -33,7 +33,7 @@ router.get("/", async (req, res) => {
       if (oAuthProvider) {
         const authServerUrl = await oAuthProvider.getAuthServerUrl({
           state: req.session.id,
-          scope: scopes as string[],
+          scopes: scopes as string[],
         });
 
         res.redirect(302, authServerUrl);

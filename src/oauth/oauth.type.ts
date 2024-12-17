@@ -4,20 +4,18 @@ export interface Credentials {
   access_token?: string | null;
   token_type?: string | null;
   id_token?: string | null;
-  scope?: string;
+  scopes?: string[];
 }
 
 export interface PanoOAuth {
+  isAuthed: boolean;
   credentials?: Credentials;
-  getTokens: (code: string) => Promise<Credentials>;
-  saveTokensToDB: (tokens: Credentials) => Promise<Credentials>;
-  loadTokensFromDB: (userId: string) => Promise<Credentials | undefined>;
-  setCredentials: (credentials: Credentials) => void;
-  getAuthServerUrl: ({
+  setCredentials(credentials: Credentials): Promise<void>;
+  getAuthServerUrl({
     state,
     scopes,
   }: {
     state: string;
     scopes: string[];
-  }) => Promise<String>;
+  }): Promise<string>;
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
-import OAuthGoogle from "@/integrations/google";
+import Google from "@/oauth/providers/google";
 import PanoTool from "@/tool-maker/PanoTool";
+import logger from "@/config/logger";
 
 const listEvents = new PanoTool({
   name: "list_google_calendar_events",
@@ -9,17 +10,13 @@ const listEvents = new PanoTool({
   schema: z.object({
     noOp: z.string().optional().describe("No-op parameter."),
   }),
-  runner: async (_, config) => {
+  runner: async (_, config, oauthProvider: InstanceType<typeof Google>) => {
     try {
-      const oauth = await new OAuthGoogle().loadAuth(
-        config.configurable!.accessToken,
-      );
-
-      if (oauth.isAuthed) {
-        return await oauth.listEvents();
-      }
-
-      return "Not authenticated.";
+      logger.info({
+        message: "Auth check wrapper: Authed",
+        provider: oauthProvider.isAuthed,
+      });
+      return await oauthProvider.listEvents();
     } catch (err) {
       return "Error fetching events: " + err;
     }

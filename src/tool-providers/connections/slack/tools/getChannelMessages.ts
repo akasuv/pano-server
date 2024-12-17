@@ -1,6 +1,6 @@
 import { z } from "zod";
 import PanoTool from "@/tool-maker/PanoTool";
-import Slack from "@/integrations/slack";
+import Slack from "@/oauth/providers/slack";
 import logger from "@/config/logger";
 
 const getChannelMessages = new PanoTool({
@@ -8,10 +8,8 @@ const getChannelMessages = new PanoTool({
   description:
     "This tool will get the messages from a slack channel, assist the user based on the messages.",
   schema: z.object({}),
-  runner: async (_, config) => {
-    const slack = await new Slack().loadAuth(config.configurable!.accessToken);
-
-    const messages = await slack.getChannelMessages();
+  runner: async (_, config, oauthProvider: InstanceType<typeof Slack>) => {
+    const messages = await oauthProvider.getChannelMessages();
 
     logger.info({
       message: "Messages fetched",

@@ -1,4 +1,4 @@
-import Slack from "@/integrations/slack";
+import Slack from "@/oauth/providers/slack";
 import PanoTool from "@/tool-maker/PanoTool";
 
 const oauth = new PanoTool({

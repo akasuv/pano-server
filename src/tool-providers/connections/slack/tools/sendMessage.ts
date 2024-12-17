@@ -1,6 +1,6 @@
 import { z } from "zod";
 import PanoTool from "@/tool-maker/PanoTool";
-import Slack from "@/integrations/slack";
+import Slack from "@/oauth/providers/slack";
 
 const sendMessage = new PanoTool({
   name: "slack_send_message",
@@ -8,10 +8,8 @@ const sendMessage = new PanoTool({
   schema: z.object({
     message: z.string().describe("Message to send to the channel"),
   }),
-  runner: async (input, config) => {
-    const slack = await new Slack().loadAuth(config.configurable!.accessToken);
-
-    const res = await slack.sendMessage({ text: input.message });
+  runner: async (input, config, oauthProvider: InstanceType<typeof Slack>) => {
+    const res = await oauthProvider.sendMessage({ text: input.message });
 
     return res;
   },

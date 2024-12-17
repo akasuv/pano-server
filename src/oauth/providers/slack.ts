@@ -2,7 +2,7 @@ import { type Auth } from "googleapis";
 import axios from "axios";
 import logger from "@/config/logger";
 import { WebClient } from "@slack/web-api";
-import OAuth from "./oauth";
+import OAuth from "../oauth";
 
 class Slack extends OAuth {
   providerId = "31eefcd7-278c-47ab-ab7b-fdc6603c3d76";
@@ -18,7 +18,7 @@ class Slack extends OAuth {
     const query = {
       client_id: "8133099718854.8139725898754",
       redirect_uri: process.env.PANO_ENDPOINT + "/oauth/redirect",
-      user_scope: "channels:history chat:write users:read",
+      user_scope: scopes.join(" "),
       state,
     };
 
@@ -30,7 +30,7 @@ class Slack extends OAuth {
     return stringifiedUrl;
   };
 
-  getTokens = async (code: string) => {
+  async getTokens(code: string) {
     const endpoint = "https://slack.com/api/oauth.v2.access";
     const res = await axios.post<{
       authed_user: { access_token: string; scope: string };
@@ -54,11 +54,13 @@ class Slack extends OAuth {
       data: res.data,
     });
 
+    const scopes = res.data.authed_user.scope.split(",");
+
     return {
       access_token: res.data.authed_user.access_token,
-      scopes: res.data.authed_user.scope.split(","),
+      scopes,
     };
-  };
+  }
 
   async getChannelMessages() {
     if (!this.credentials) {
@@ -111,28 +113,6 @@ class Slack extends OAuth {
     });
 
     return result.ok;
-  }
-
-  async loadAuth(requestAccessToken: string) {
-    console.log("loading auth");
-    this.connectToSupabase({
-      requestAccessToken,
-    });
-
-    const tokens = await this.loadTokensFromDB();
-
-    if (tokens) {
-      this.setCredentials(tokens);
-      this.isAuthed = true;
-    }
-
-    console.log("isAuthed", this.isAuthed);
-
-    return this;
-  }
-
-  async setCredentials(credentials: Auth.Credentials) {
-    this.credentials = credentials;
   }
 }
 
