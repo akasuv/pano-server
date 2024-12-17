@@ -2,13 +2,11 @@ import z from "zod";
 import PanoTool, { Schema } from "./PanoTool";
 import {
   DynamicStructuredTool,
-  DynamicTool,
   tool as LangChainTool,
 } from "@langchain/core/tools";
 import { LangGraphRunnableConfig } from "@langchain/langgraph";
 import logger from "@/config/logger";
-import Google from "@/oauth/providers/google";
-import Slack from "@/oauth/providers/slack";
+import { OAuthProviders } from "@/oauth/oauth.type";
 
 export type InstalledTool = DynamicStructuredTool<Schema>;
 
@@ -23,7 +21,7 @@ type Config<K extends PanoToolProvider.Type, O> = {
 
 export class PanoToolProvider<
   T extends PanoTool<z.infer<Schema>, Config<K, O>["oauthProvider"]>,
-  O extends InstanceType<typeof Google> | InstanceType<typeof Slack>,
+  O extends OAuthProviders,
   K extends PanoToolProvider.Type = PanoToolProvider.Type,
 > {
   type: PanoToolProvider.Type;
@@ -55,7 +53,7 @@ export class PanoToolProvider<
     config: C,
     tool: T,
   ) {
-    logger.info({ message: "Auth check wrapper", input, config });
+    logger.info({ message: "Auth check wrapper", input });
     if (this.type === PanoToolProvider.Type.Connection) {
       if (!this.oauthProvider) {
         throw new Error(

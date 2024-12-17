@@ -32,6 +32,7 @@
     "googleapis": "^144.0.0",
     "jwt-decode": "^4.0.0",
     "langchain": "^0.3.6",
+    "octokit": "^4.0.2",
     "pino-http": "^10.3.0",
     "pino-pretty": "^13.0.0",
     "query-string": "^9.1.1",

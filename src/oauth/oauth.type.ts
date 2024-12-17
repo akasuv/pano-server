@@ -1,3 +1,8 @@
+import Google from "./providers/google";
+import Slack from "./providers/slack";
+import Github from "./providers/github";
+import Zoom from "./providers/zoom";
+
 export interface Credentials {
   refresh_token?: string | null;
   expiry_date?: number | null;
@@ -19,3 +24,9 @@ export interface PanoOAuth {
     scopes: string[];
   }): Promise<string>;
 }
+
+export type OAuthProviders =
+  | InstanceType<typeof Google>
+  | InstanceType<typeof Slack>
+  | InstanceType<typeof Github>
+  | InstanceType<typeof Zoom>;

@@ -22,6 +22,18 @@ const getOAuthProviders = new PanoTool({
         ],
         description: "This provider will allow you to connect to Google",
       },
+      {
+        id: "ce2cd7ce-f104-4690-8991-13e55a3b2bd6",
+        name: "GitHub",
+        scopes: ["repo"],
+        description: "This provider will allow you to connect to GitHub",
+      },
+      {
+        id: "1b612fd5-a6bb-4a7d-96bb-15498ab8475e",
+        name: "Zoom",
+        scopes: ["meeting:write:meeting"],
+        description: "This provider will allow you to connect to Zoom",
+      },
     ]);
   },
 });

@@ -1,4 +1,3 @@
-import { type Auth } from "googleapis";
 import axios from "axios";
 import logger from "@/config/logger";
 import { WebClient } from "@slack/web-api";
@@ -7,13 +6,13 @@ import OAuth from "../oauth";
 class Slack extends OAuth {
   providerId = "31eefcd7-278c-47ab-ab7b-fdc6603c3d76";
 
-  getAuthServerUrl = async ({
+  async getAuthServerUrl({
     state,
     scopes,
   }: {
     state: string;
     scopes: string[];
-  }) => {
+  }) {
     const queryString = (await import("query-string")).default;
     const query = {
       client_id: "8133099718854.8139725898754",
@@ -28,7 +27,7 @@ class Slack extends OAuth {
     });
 
     return stringifiedUrl;
-  };
+  }
 
   async getTokens(code: string) {
     const endpoint = "https://slack.com/api/oauth.v2.access";

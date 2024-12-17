@@ -1,6 +1,5 @@
 import OAuth from "@/oauth/oauth";
-import Google from "@/oauth/providers/google";
-import Slack from "@/oauth/providers/slack";
+import { OAuthProviders } from "@/oauth/oauth.type";
 import { LangGraphRunnableConfig } from "@langchain/langgraph";
 import { z } from "zod";
 
@@ -10,10 +9,7 @@ export type Schema = ZodObjectAny | z.ZodString;
 
 class PanoTool<
   T extends Schema = Schema,
-  O extends
-    | InstanceType<typeof Google>
-    | InstanceType<typeof Slack>
-    | undefined = undefined,
+  O extends OAuthProviders | undefined = undefined,
 > {
   name: string;
   description: string;
